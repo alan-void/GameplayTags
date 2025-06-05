@@ -9,11 +9,9 @@ public class TagManager : MonoBehaviour
 {
     private Dictionary<GameplayTagInternal, HashSet<TagComponent>> tagMap = new();
 
+    //TODO: remove this
     [SerializeField] private GameplayTag testTag;
         
-    [SerializeField]
-    TextAsset tagConfigFile;
-    
     public static TagManager I { get; private set; }
 
     private void Awake()
