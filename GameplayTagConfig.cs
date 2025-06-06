@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -9,39 +10,79 @@ namespace GameplayTags
 public class GameplayTagConfig : ScriptableSingleton<GameplayTagConfig>
 {
     // [SerializeField] private List<GameplayTag> rootTags;
-    [SerializeReference]
-    public GameplayTagInternal rootTag = new("");
-
+    const string ROOT_TAG_PATH = "Assets/Resources/Tags/root.asset";
+    public GameplayTag rootTag
+    {
+        get
+        {
+            var root = AssetDatabase.LoadAssetAtPath<GameplayTag>(ROOT_TAG_PATH);
+            if (!root)
+            {
+                var newTag = CreateInstance<GameplayTag>();
+                AssetDatabase.CreateAsset(newTag, ROOT_TAG_PATH);
+                AssetDatabase.SaveAssets();
+                root = AssetDatabase.LoadAssetAtPath<GameplayTag>(ROOT_TAG_PATH);
+            }
+            return root;
+        }
+    }
 
     public void AddTag(string tag)
     {
         // create and add tag from the . separated string format
         var tagParts = tag.Split('.');
-        GameplayTagInternal currentTag = rootTag;
+        GameplayTag currentTag = rootTag;
         foreach (var part in tagParts)
         {
-            var partTag = currentTag.childTags.Find(t => t.tagName == part);
+            if (part == "")
+            {
+                Debug.LogAssertion("Tag name cannot be empty.");
+                return;
+            }
+            //part should only contain alphabets
+            if (!System.Text.RegularExpressions.Regex.IsMatch(part, @"^[a-zA-Z]+$"))
+            {
+                Debug.LogAssertion($"Tag name '{part}' can only contain alphabets.");
+                return;
+            }
+        }
+        foreach (var part in tagParts)
+        {
+            var partTag = currentTag.childTags.Find(t => t.TagName == part);
             if (partTag == null)
             {
-                partTag = new GameplayTagInternal(part, currentTag);
+                // partTag = new GameplayTag(part, currentTag);
+                partTag = CreateInstance<GameplayTag>();
+                partTag.UpdateName(part);
+                partTag.SetParent(currentTag);
+                EditorUtility.SetDirty(currentTag);
+                var assetPath = $"Assets/Resources/Tags/{partTag.TagFullName}_tag.asset";
+                AssetDatabase.CreateAsset(partTag, assetPath);
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+                partTag = AssetDatabase.LoadAssetAtPath<GameplayTag>(assetPath);
             }
             currentTag = partTag;
         }
+        AssetDatabase.SaveAssets();
         Save(true);
     }
 
-    public void RemoveTag(GameplayTagInternal tag)
+    public void RemoveTag(GameplayTag tag)
     {
         tag.SetParent(null);
-        Save(true);
-
-        foreach (var tagRef in FindObjectsByType<GameplayTag>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+        var children = new List<GameplayTag>(tag.childTags);
+        foreach (var child in children)
         {
-            tagRef.OnTagDeleted(tag);
+            RemoveTag(child);
         }
+        AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(tag));
+        DestroyImmediate(tag);
+        Save(true);
+        AssetDatabase.SaveAssets();
     }
     
-    public void RenameTag(GameplayTagInternal tag, string newName)
+    public void RenameTag(GameplayTag tag, string newName)
     {
         if (string.IsNullOrEmpty(newName) || newName.Contains(' '))
         {
@@ -53,7 +94,7 @@ public class GameplayTagConfig : ScriptableSingleton<GameplayTagConfig>
         foreach (var sibling in tag.parentTag.childTags)
         {
             if(sibling == tag) continue; // Skip the tag itself
-            if (sibling.tagName == newName)
+            if (sibling.TagName == newName)
             {
                 Debug.LogAssertion($"Tag '{newName}' already exists in the same parent.");
                 return;
@@ -61,28 +102,24 @@ public class GameplayTagConfig : ScriptableSingleton<GameplayTagConfig>
         }
 
         // Update the tag name
-        tag.tagName = newName;
+        tag.UpdateName(newName);
         Save(true);
-        
-        foreach (var tagRef in FindObjectsByType<GameplayTag>(FindObjectsInactive.Include, FindObjectsSortMode.None))
-        {
-            tagRef.OnTagRenamed(tag);
-        }
+        AssetDatabase.SaveAssets();
     }
     
     
 
-    public GameplayTagInternal GetTag(string tagFullName)
+    public GameplayTag GetTag(string tagFullName)
     {
         if(tagFullName=="")
         {
             return null;
         }
         var tagParts = tagFullName.Split('.');
-        GameplayTagInternal currentTag = rootTag;
+        GameplayTag currentTag = rootTag;
         foreach (var part in tagParts)
         {
-            var partTag = currentTag.childTags.Find(t => t.tagName == part);
+            var partTag = currentTag.childTags.Find(t => t.TagName == part);
             if (partTag == null)
             {
                 return null; // Tag not found

@@ -7,21 +7,21 @@ namespace GameplayTags
 [Serializable]
 public class GameplayTagSet
 {
-    private HashSet<GameplayTagInternal> _tags = new();
+    private HashSet<GameplayTag> _tags = new();
 
     public GameplayTagSet() { }
 
-    public GameplayTagSet(IEnumerable<GameplayTagInternal> initialTags)
+    public GameplayTagSet(IEnumerable<GameplayTag> initialTags)
     {
-        _tags = new HashSet<GameplayTagInternal>(initialTags);
+        _tags = new HashSet<GameplayTag>(initialTags);
     }
 
-    public void AddTag(GameplayTagInternal tag)
+    public void AddTag(GameplayTag tag)
     {
         _tags.Add(tag);
     }
 
-    public void RemoveTag(GameplayTagInternal tag)
+    public void RemoveTag(GameplayTag tag)
     {
         _tags.Remove(tag);
     }
@@ -31,7 +31,7 @@ public class GameplayTagSet
         return new GameplayTagSet(_tags.Except(other._tags));
     }
 
-    public bool HasTag(GameplayTagInternal tag)
+    public bool HasTag(GameplayTag tag)
     {
         return _tags.Contains(tag);
     }
@@ -46,12 +46,12 @@ public class GameplayTagSet
         return other._tags.All(HasTag);
     }
 
-    public bool HasParentOf(GameplayTagInternal tag)
+    public bool HasParentOf(GameplayTag tag)
     {
         return _tags.Any(tag.IsChildOf);
     }
 
-    public bool AreAllParentOf(GameplayTagInternal tag)
+    public bool AreAllParentOf(GameplayTag tag)
     {
         return _tags.All(tag.IsChildOf);
     }
@@ -66,12 +66,12 @@ public class GameplayTagSet
         return other._tags.All(HasParentOf);
     }
     
-    public bool HasChildOf(GameplayTagInternal tag)
+    public bool HasChildOf(GameplayTag tag)
     {
         return _tags.Any(t => t.IsChildOf(tag));
     }
     
-    public bool AreAllChildOf(GameplayTagInternal tag)
+    public bool AreAllChildOf(GameplayTag tag)
     {
         return _tags.All(t => t.IsChildOf(tag));
     }
@@ -86,14 +86,14 @@ public class GameplayTagSet
         return other._tags.All(HasChildOf);
     }
 
-    public IEnumerable<GameplayTagInternal> GetAllTags()
+    public IEnumerable<GameplayTag> GetAllTags()
     {
         return _tags;
     }
 
     public override string ToString()
     {
-        return $"[{string.Join(", ", _tags.Select(t => t.tagName))}]";
+        return $"[{string.Join(", ", _tags.Select(t => t.TagName))}]";
     }
 }
 }

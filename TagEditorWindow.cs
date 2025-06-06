@@ -1,8 +1,9 @@
 using System.Collections.Generic;
-using UnityEngine;
 using UnityEditor;
-using GameplayTags;
+using UnityEngine;
 
+namespace GameplayTags
+{
 public class TagEditorWindow : EditorWindow
 {
     #region Constants
@@ -14,10 +15,10 @@ public class TagEditorWindow : EditorWindow
 
     #region Fields
     private string _newTag = "";
-    private readonly Dictionary<GameplayTagInternal, bool> _foldouts = new();
+    private readonly Dictionary<GameplayTag, bool> _foldouts = new();
     
     // Rename state
-    private GameplayTagInternal _renamingTag = null;
+    private GameplayTag _renamingTag = null;
     private string _renameBuffer = "";
     private bool _renameChanged = false;
     private bool _renameJustStarted = false;
@@ -61,7 +62,7 @@ public class TagEditorWindow : EditorWindow
         }
     }
 
-    private void DrawTagHierarchy(GameplayTagInternal tag, int indent = 0)
+    private void DrawTagHierarchy(GameplayTag tag, int indent = 0)
     {
         if (!HasChildTags(tag)) return;
 
@@ -77,7 +78,7 @@ public class TagEditorWindow : EditorWindow
         }
     }
 
-    private void DrawTagLine(GameplayTagInternal tag, int indent)
+    private void DrawTagLine(GameplayTag tag, int indent)
     {
         var rects = CalculateTagLineRects(indent);
         
@@ -93,18 +94,18 @@ public class TagEditorWindow : EditorWindow
         }
     }
 
-    private void DrawFoldout(GameplayTagInternal tag, Rect foldoutRect)
+    private void DrawFoldout(GameplayTag tag, Rect foldoutRect)
     {
         _foldouts[tag] = EditorGUI.Foldout(foldoutRect, _foldouts[tag], GUIContent.none, true);
     }
 
-    private void DrawTagLabel(GameplayTagInternal tag, Rect labelRect)
+    private void DrawTagLabel(GameplayTag tag, Rect labelRect)
     {
-        EditorGUI.LabelField(labelRect, tag.tagName);
+        EditorGUI.LabelField(labelRect, tag.TagName);
         HandleLabelMouseEvents(tag, labelRect);
     }
 
-    private void DrawRenameField(GameplayTagInternal tag, Rect textFieldRect)
+    private void DrawRenameField(GameplayTag tag, Rect textFieldRect)
     {
         HandleRenameKeyboardInput(tag);
         HandleRenameFocusLoss(tag);
@@ -124,7 +125,7 @@ public class TagEditorWindow : EditorWindow
     #endregion
 
     #region Event Handling
-    private void HandleLabelMouseEvents(GameplayTagInternal tag, Rect labelRect)
+    private void HandleLabelMouseEvents(GameplayTag tag, Rect labelRect)
     {
         if (!labelRect.Contains(Event.current.mousePosition)) return;
 
@@ -143,7 +144,7 @@ public class TagEditorWindow : EditorWindow
         }
     }
 
-    private void HandleRenameKeyboardInput(GameplayTagInternal tag)
+    private void HandleRenameKeyboardInput(GameplayTag tag)
     {
         if (Event.current.type == EventType.KeyDown && 
             Event.current.keyCode == KeyCode.Return &&
@@ -154,7 +155,7 @@ public class TagEditorWindow : EditorWindow
         }
     }
 
-    private void HandleRenameFocusLoss(GameplayTagInternal tag)
+    private void HandleRenameFocusLoss(GameplayTag tag)
     {
         if (IsRenaming(tag) &&
             GUI.GetNameOfFocusedControl() != RENAME_CONTROL_NAME &&
@@ -176,7 +177,7 @@ public class TagEditorWindow : EditorWindow
     #endregion
 
     #region Context Menu
-    private void ShowContextMenu(GameplayTagInternal tag)
+    private void ShowContextMenu(GameplayTag tag)
     {
         var menu = new GenericMenu();
 
@@ -197,10 +198,10 @@ public class TagEditorWindow : EditorWindow
         _newTag = "";
     }
 
-    private void TryDeleteTag(GameplayTagInternal tag)
+    private void TryDeleteTag(GameplayTag tag)
     {
         if (!EditorUtility.DisplayDialog("Confirm Delete",
-                $"Are you sure you want to delete the tag '{tag.tagName}'?",
+                $"Are you sure you want to delete the tag '{tag.TagName}'?",
                 "Delete", "Cancel"))
         {
             return;
@@ -211,20 +212,20 @@ public class TagEditorWindow : EditorWindow
         Repaint();
     }
 
-    private void StartRename(GameplayTagInternal tag)
+    private void StartRename(GameplayTag tag)
     {
         _renamingTag = tag;
-        _renameBuffer = tag.tagName;
+        _renameBuffer = tag.TagName;
         _renameChanged = false;
         _renameJustStarted = true;
         GUI.FocusControl(null);
     }
 
-    private void CommitRename(GameplayTagInternal tag)
+    private void CommitRename(GameplayTag tag)
     {
         if (ShouldCommitRename(tag))
         {
-            Debug.Log($"Renaming tag {tag.tagName} to {_renameBuffer}");
+            Debug.Log($"Renaming tag {tag.TagName} to {_renameBuffer}");
             GameplayTagConfig.instance.RenameTag(tag, _renameBuffer);
         }
 
@@ -233,12 +234,12 @@ public class TagEditorWindow : EditorWindow
     #endregion
 
     #region Helper Methods
-    private bool HasChildTags(GameplayTagInternal tag)
+    private bool HasChildTags(GameplayTag tag)
     {
         return tag.childTags != null && tag.childTags.Count > 0;
     }
 
-    private void EnsureFoldoutExists(GameplayTagInternal tag)
+    private void EnsureFoldoutExists(GameplayTag tag)
     {
         if (!_foldouts.ContainsKey(tag))
         {
@@ -246,7 +247,7 @@ public class TagEditorWindow : EditorWindow
         }
     }
 
-    private bool IsRenaming(GameplayTagInternal tag)
+    private bool IsRenaming(GameplayTag tag)
     {
         return _renamingTag == tag;
     }
@@ -273,12 +274,12 @@ public class TagEditorWindow : EditorWindow
         return (foldoutRect, labelRect);
     }
 
-    private bool ShouldCommitRename(GameplayTagInternal tag)
+    private bool ShouldCommitRename(GameplayTag tag)
     {
-        return !string.IsNullOrWhiteSpace(_renameBuffer) && _renameBuffer != tag.tagName;
+        return !string.IsNullOrWhiteSpace(_renameBuffer) && _renameBuffer != tag.TagName;
     }
 
-    private void CleanupTagReferences(GameplayTagInternal tag)
+    private void CleanupTagReferences(GameplayTag tag)
     {
         _foldouts.Remove(tag);
         if (_renamingTag == tag)
@@ -295,4 +296,5 @@ public class TagEditorWindow : EditorWindow
         _renameJustStarted = false;
     }
     #endregion
+}
 }
