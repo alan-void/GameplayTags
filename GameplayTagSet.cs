@@ -1,99 +1,122 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace GameplayTags
 {
 [Serializable]
 public class GameplayTagSet
-{
-    private HashSet<GameplayTag> _tags = new();
+{ 
+    [SerializeField] private SerializableHashSet<GameplayTag> tags = new();
 
     public GameplayTagSet() { }
 
     public GameplayTagSet(IEnumerable<GameplayTag> initialTags)
     {
-        _tags = new HashSet<GameplayTag>(initialTags);
+        tags = new SerializableHashSet<GameplayTag>(initialTags);
     }
 
     public void AddTag(GameplayTag tag)
     {
-        _tags.Add(tag);
+        tags.Add(tag);
     }
 
     public void RemoveTag(GameplayTag tag)
     {
-        _tags.Remove(tag);
+        tags.Remove(tag);
     }
     
     public GameplayTagSet Difference(GameplayTagSet other)
     {
-        return new GameplayTagSet(_tags.Except(other._tags));
+        return new GameplayTagSet(tags.Except(other.tags));
     }
 
     public bool HasTag(GameplayTag tag)
     {
-        return _tags.Contains(tag);
+        return tags.Contains(tag);
     }
     
     public bool HasTagAny(GameplayTagSet other)
     {
-        return other._tags.Any(HasTag);
+        return other.tags.Any(HasTag);
     }
     
     public bool HasTagAll(GameplayTagSet other)
     {
-        return other._tags.All(HasTag);
+        return other.tags.All(HasTag);
     }
 
     public bool HasParentOf(GameplayTag tag)
     {
-        return _tags.Any(tag.IsChildOf);
+        return tags.Any(tag.IsChildOf);
     }
 
     public bool AreAllParentOf(GameplayTag tag)
     {
-        return _tags.All(tag.IsChildOf);
+        return tags.All(tag.IsChildOf);
     }
 
     public bool HasParentOfAny(GameplayTagSet other)
     {
-        return other._tags.Any(HasParentOf);
+        return other.tags.Any(HasParentOf);
     }
     
     public bool HasParentOfAll(GameplayTagSet other)
     {
-        return other._tags.All(HasParentOf);
+        return other.tags.All(HasParentOf);
     }
     
     public bool HasChildOf(GameplayTag tag)
     {
-        return _tags.Any(t => t.IsChildOf(tag));
+        return tags.Any(t => t.IsChildOf(tag));
     }
     
     public bool AreAllChildOf(GameplayTag tag)
     {
-        return _tags.All(t => t.IsChildOf(tag));
+        return tags.All(t => t.IsChildOf(tag));
     }
     
     public bool HasChildOfAny(GameplayTagSet other)
     {
-        return other._tags.Any(HasChildOf);
+        return other.tags.Any(HasChildOf);
     }
 
     public bool HasChildOfAll(GameplayTagSet other)
     {
-        return other._tags.All(HasChildOf);
+        return other.tags.All(HasChildOf);
     }
 
     public IEnumerable<GameplayTag> GetAllTags()
     {
-        return _tags;
+        return tags;
     }
 
     public override string ToString()
     {
-        return $"[{string.Join(", ", _tags.Select(t => t.TagName))}]";
+        return $"[{string.Join(", ", tags.Select(t => t.TagName))}]";
     }
 }
+
+#if UNITY_EDITOR
+[CustomPropertyDrawer(typeof(GameplayTagSet))]
+public class GameplayTagSetDrawer : PropertyDrawer
+{
+    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+    {
+        SerializedProperty tagsProp = property.FindPropertyRelative("tags");
+        SerializedProperty valuesProp = tagsProp.FindPropertyRelative("values");
+        EditorGUI.PropertyField(position, valuesProp, label, true);
+    }
+
+    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+    {
+        SerializedProperty tagsProp = property.FindPropertyRelative("tags");
+        SerializedProperty valuesProp = tagsProp.FindPropertyRelative("values");
+        return EditorGUI.GetPropertyHeight(valuesProp, label, true);
+    }
+}
+#endif
 }

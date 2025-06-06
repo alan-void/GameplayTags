@@ -12,6 +12,7 @@ public class TagManager : MonoBehaviour
 
     //TODO: remove this
     [SerializeField] private GameplayTag testTag;
+    // [SerializeField] private GameplayTagSet testTagSet;
 
     public static GameplayTag RootTag => GameplayTagConfig.instance.rootTag;
     

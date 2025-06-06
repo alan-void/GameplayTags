@@ -6,11 +6,6 @@ using GameplayTags;
 
 public class TagComponent : SimBehaviour
 {
-    // [SerializeField] private SerializableHashSet<int> tmp;
-
     [SerializeField]
     GameplayTagSet tagSet;
-    
-    
-    
 }
