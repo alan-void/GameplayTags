@@ -1,6 +1,8 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using spatial;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -8,10 +10,11 @@ using UnityEngine.Serialization;
 namespace GameplayTags
 {
 [Serializable]
-public class GameplayTagSet
+public class GameplayTagSet : IEnumerable<GameplayTag>
 { 
     [SerializeField] private SerializableHashSet<GameplayTag> tags = new();
 
+    
     public GameplayTagSet() { }
 
     public GameplayTagSet(IEnumerable<GameplayTag> initialTags)
@@ -19,14 +22,14 @@ public class GameplayTagSet
         tags = new SerializableHashSet<GameplayTag>(initialTags);
     }
 
-    public void AddTag(GameplayTag tag)
+    public bool AddTag(GameplayTag tag)
     {
-        tags.Add(tag);
+        return tags.Add(tag);
     }
 
-    public void RemoveTag(GameplayTag tag)
+    public bool RemoveTag(GameplayTag tag)
     {
-        tags.Remove(tag);
+        return tags.Remove(tag);
     }
     
     public GameplayTagSet Difference(GameplayTagSet other)
@@ -98,6 +101,17 @@ public class GameplayTagSet
     {
         return $"[{string.Join(", ", tags.Select(t => t.TagName))}]";
     }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
+
+    public IEnumerator<GameplayTag> GetEnumerator()
+    {
+        return tags.GetEnumerator();
+    }
+
 }
 
 #if UNITY_EDITOR

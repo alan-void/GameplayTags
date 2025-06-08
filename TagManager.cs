@@ -2,123 +2,107 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using GameplayTags;
+using spatial;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-public class TagManager : MonoBehaviour
+public class TagManager : SimBehaviour
 {
-    private Dictionary<GameplayTag, HashSet<TagComponent>> tagMap = new();
+    private Dictionary<GameplayTag, Bvh2d<SimObject>> tagBvh = new();
 
-    //TODO: remove this
-    [SerializeField] private GameplayTag testTag;
-    // [SerializeField] private GameplayTagSet testTagSet;
+    [SerializeField] private GameplayTagSet testTagSet;
 
     public static GameplayTag RootTag => GameplayTagConfig.instance.rootTag;
     
     public static TagManager I { get; private set; }
 
-    private void Awake()
+    public bool debugDrawBvh = false;
+
+    protected override void SimInit()
     {
-        if (I == null)
+        base.SimInit();
+        if (!I)
         {
             I = this;
         }
         else
         {
-            Destroy(gameObject);
+            Destroy(this);
+        }
+    }
+    
+    public void RegisterTagComponent(TagComponent component)
+    {
+        Assert.IsNotNull(component, "TagComponent cannot be null");
+        
+        foreach (var gameplayTag in component.TagSet)
+        {
+            if (!tagBvh.ContainsKey(gameplayTag))
+            {
+                tagBvh[gameplayTag] = new();
+            }
+            tagBvh[gameplayTag].InsertEntity(component.SimObject);
+        }
+
+        component.SimObject.OnPeriodicUpdate += UpdateBvh;
+        component.SimObject.OnVelocityChanged += UpdateBvh;
+        component.OnTagSetAltered += OnTagSetAltered;
+    }
+    
+    void UpdateBvh(SimObject simObject)
+    {
+        foreach (var gameplayTag in simObject.TagComponent.TagSet)
+        {        
+            //the remove works because the new bounds will still intersect the old bounds
+            tagBvh[gameplayTag].RemoveEntity(simObject);
+            tagBvh[gameplayTag].InsertEntity(simObject);
         }
     }
 
-    // private void OnValidate()
-    // {
-    //     SyncTagsWithConfig();
-    // }
-
-    // void SyncTagsWithConfig()
-    // {
-    //     SyncRecursive(rootTag, GameplayTagConfig.instance.rootTag);
-    // }
-    //
-    // private void SyncRecursive(GameplayTag tagSo, GameplayTagInternal internalTag)
-    // {
-    //     if (internalTag == null && tagSo == null)
-    //         return;
-    //
-    //     if (internalTag == null)
-    //     {
-    //         //delete the tags from the SO
-    //         foreach(var childTagSo in tagSo.childTags)
-    //         {
-    //             SyncRecursive(childTagSo, null);
-    //         }
-    //         DestroyImmediate(tagSo);
-    //         return;
-    //     }
-    //     
-    //     if (!tagSo)
-    //     {
-    //         Assert.IsTrue(false);
-    //     }
-    //     
-    //     if(tagSo.TagName != internalTag.tagName)
-    //     {
-    //         if (internalTag.previousNames.Contains(tagSo.TagName))
-    //         {
-    //             tagSo.UpdateName(internalTag.tagName);
-    //         }
-    //         else
-    //         {
-    //             Assert.IsTrue(false);
-    //         }
-    //     }
-    //     
-    //     var childTagsSo = new List<GameplayTag>(tagSo.childTags);
-    //
-    //     foreach (var childTagInternal in internalTag.childTags)
-    //     {
-    //         GameplayTag childTagSo = null;
-    //         // Match with same name if exists
-    //         foreach (var child in childTagsSo)
-    //         {
-    //             if (child.TagName == childTagInternal.tagName)
-    //             {
-    //                 childTagSo = child;
-    //                 break;
-    //             }
-    //         }
-    //         if (childTagSo != null)
-    //         {
-    //             childTagsSo.Remove(childTagSo);
-    //             SyncRecursive(childTagSo, childTagInternal);
-    //             break;
-    //         }
-    //         // Match with previous names if exists (renamed tags)
-    //         foreach (var child in childTagsSo)
-    //         {
-    //             if (childTagInternal.previousNames.Contains(child.TagName))
-    //             {
-    //                 childTagSo = child;
-    //                 break;
-    //             }
-    //         }
-    //         if (childTagSo != null)
-    //         {
-    //             childTagsSo.Remove(childTagSo);
-    //             SyncRecursive(childTagSo, childTagInternal);
-    //             break;
-    //         }
-    //         // tag does not exist in SO, create it
-    //         childTagSo = ScriptableObject.CreateInstance<GameplayTag>();
-    //         childTagSo.UpdateName(internalTag.tagName);
-    //         childTagSo.SetParent(tagSo);
-    //         SyncRecursive(childTagSo, childTagInternal);
-    //     }
-    //     
-    //     // childTagsSo now contains unmatched SO tags
-    //     foreach (var childTagSo in childTagsSo)
-    //     {
-    //         SyncRecursive(childTagSo, null);
-    //     }
-    // }
+    public void UnregisterTagComponent(TagComponent component)
+    {
+        Assert.IsNotNull(component, "TagComponent cannot be null");
+        
+        foreach (var gameplayTag in component.TagSet)
+        {
+            if (tagBvh.ContainsKey(gameplayTag))
+            {
+                tagBvh[gameplayTag].RemoveEntity(component.SimObject);
+            }
+        }
+        component.OnTagSetAltered -= OnTagSetAltered;
+        component.SimObject.OnPeriodicUpdate -= UpdateBvh;
+        component.SimObject.OnVelocityChanged -= UpdateBvh;
+    }
+    
+    void OnTagSetAltered(TagComponent component, GameplayTag gameplayTag, bool added)
+    {
+        if (added)
+        {
+            if (!tagBvh.ContainsKey(gameplayTag))
+            {
+                tagBvh[gameplayTag] = new();
+            }
+            tagBvh[gameplayTag].InsertEntity(component.SimObject);
+        }
+        else
+        {
+            if (tagBvh.ContainsKey(gameplayTag))
+            {
+                tagBvh[gameplayTag].RemoveEntity(component.SimObject);
+            }
+        }
+    }
+    private void OnDrawGizmos()
+    {
+        if (debugDrawBvh)
+        {
+            foreach (var bvhTree in tagBvh.Values)
+            {
+                bvhTree.DebugDraw();                
+            }
+        }
+    }
+    
 }
