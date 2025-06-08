@@ -101,16 +101,22 @@ public class GameplayTagSet : IEnumerable<GameplayTag>
     {
         return $"[{string.Join(", ", tags.Select(t => t.TagName))}]";
     }
+    public IEnumerator<GameplayTag> GetEnumerator()
+    {
+        foreach (var tag in tags)
+        {
+            if (tag != null && !ReferenceEquals(tag, TagManager.RootTag))
+            {
+                yield return tag;
+            }
+        }
+    }
 
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
     }
 
-    public IEnumerator<GameplayTag> GetEnumerator()
-    {
-        return tags.GetEnumerator();
-    }
 
 }
 
