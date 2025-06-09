@@ -55,6 +55,7 @@ public class TagManager : SimBehaviour
         foreach (var gameplayTag in simObject.TagComponent.TagSet)
         {        
             //the remove works because the new bounds will still intersect the old bounds
+            //TODO: Add fail warning here
             tagBvh[gameplayTag].RemoveEntity(simObject);
             tagBvh[gameplayTag].InsertEntity(simObject);
         }
