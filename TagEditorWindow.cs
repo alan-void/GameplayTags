@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -17,6 +17,9 @@ public class TagEditorWindow : EditorWindow
     private string _newTag = "";
     private readonly Dictionary<GameplayTag, bool> _foldouts = new();
     
+    // Scroll state
+    private Vector2 _scrollPos;
+
     // Rename state
     private GameplayTag _renamingTag = null;
     private string _renameBuffer = "";
@@ -30,11 +33,14 @@ public class TagEditorWindow : EditorWindow
     {
         GetWindow<TagEditorWindow>("Tag Editor");
     }
-    
+
     private void OnGUI()
     {
         DrawHeader();
+
+        _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
         DrawTagHierarchy();
+        EditorGUILayout.EndScrollView();
     }
     #endregion
 
@@ -70,7 +76,7 @@ public class TagEditorWindow : EditorWindow
         {
             EnsureFoldoutExists(child);
             DrawTagLine(child, indent);
-            
+
             if (_foldouts[child])
             {
                 DrawTagHierarchy(child, indent + 1);
@@ -81,9 +87,9 @@ public class TagEditorWindow : EditorWindow
     private void DrawTagLine(GameplayTag tag, int indent)
     {
         var rects = CalculateTagLineRects(indent);
-        
+
         DrawFoldout(tag, rects.foldout);
-        
+
         if (IsRenaming(tag))
         {
             DrawRenameField(tag, rects.label);
@@ -109,12 +115,12 @@ public class TagEditorWindow : EditorWindow
     {
         HandleRenameKeyboardInput(tag);
         HandleRenameFocusLoss(tag);
-        
+
         GUI.SetNextControlName(RENAME_CONTROL_NAME);
         EditorGUI.BeginChangeCheck();
-        
+
         _renameBuffer = EditorGUI.TextField(textFieldRect, _renameBuffer);
-        
+
         if (EditorGUI.EndChangeCheck())
         {
             _renameChanged = true;
@@ -136,7 +142,7 @@ public class TagEditorWindow : EditorWindow
                 Event.current.Use();
                 Repaint();
                 break;
-                
+
             case EventType.ContextClick:
                 ShowContextMenu(tag);
                 Event.current.Use();
@@ -146,7 +152,7 @@ public class TagEditorWindow : EditorWindow
 
     private void HandleRenameKeyboardInput(GameplayTag tag)
     {
-        if (Event.current.type == EventType.KeyDown && 
+        if (Event.current.type == EventType.KeyDown &&
             Event.current.keyCode == KeyCode.Return &&
             GUI.GetNameOfFocusedControl() == RENAME_CONTROL_NAME)
         {
@@ -192,7 +198,7 @@ public class TagEditorWindow : EditorWindow
     private void TryAddNewTag()
     {
         if (string.IsNullOrWhiteSpace(_newTag)) return;
-        
+
         Debug.Log($"Adding tag {_newTag}");
         GameplayTagConfig.instance.AddTag(_newTag);
         _newTag = "";
@@ -254,21 +260,21 @@ public class TagEditorWindow : EditorWindow
 
     private (Rect foldout, Rect label) CalculateTagLineRects(int indent)
     {
-        var lineRect = GUILayoutUtility.GetRect(0, EditorGUIUtility.singleLineHeight, 
+        var lineRect = GUILayoutUtility.GetRect(0, EditorGUIUtility.singleLineHeight,
             GUILayout.ExpandWidth(true));
-        
+
         float indentOffset = indent * INDENT_WIDTH;
-        
+
         var foldoutRect = new Rect(
-            lineRect.x + indentOffset, 
-            lineRect.y, 
-            FOLDOUT_WIDTH, 
-            lineRect.height);
-        
-        var labelRect = new Rect(
-            foldoutRect.xMax + LABEL_PADDING, 
+            lineRect.x + indentOffset,
             lineRect.y,
-            lineRect.width - indentOffset - FOLDOUT_WIDTH - LABEL_PADDING, 
+            FOLDOUT_WIDTH,
+            lineRect.height);
+
+        var labelRect = new Rect(
+            foldoutRect.xMax + LABEL_PADDING,
+            lineRect.y,
+            lineRect.width - indentOffset - FOLDOUT_WIDTH - LABEL_PADDING,
             lineRect.height);
 
         return (foldoutRect, labelRect);
