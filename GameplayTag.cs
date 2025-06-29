@@ -59,11 +59,13 @@ public class GameplayTag : ScriptableObject
         {
             parentTag.childTags.Remove(this);
         }
+        ScriptableObjectUtil.ForceSave(parentTag);
         parentTag = newParent;
         if (newParent)
         {
             newParent.childTags.Add(this);
         }
+        ScriptableObjectUtil.ForceSave(parentTag);
         _dirty = true;
     }
 

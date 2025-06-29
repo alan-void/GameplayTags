@@ -16,7 +16,7 @@ public class TagComponent : SimBehaviour
         TagComponent component, GameplayTag tag, bool added);
     
     public event OnTagSetAlteredCallback OnTagSetAltered;
-    
+
     protected override void SimInit()
     {
         base.SimInit();
@@ -49,6 +49,10 @@ public class TagComponent : SimBehaviour
         }
         return false;
     }
-    
-    
+
+    public override void OnSimDestroy()
+    {
+        base.OnSimDestroy();
+        TagManager.I.UnregisterTagComponent(this);
+    }
 }

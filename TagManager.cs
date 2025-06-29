@@ -11,8 +11,6 @@ public class TagManager : SimBehaviour
 {
     private Dictionary<GameplayTag, Bvh2d<SimObject>> tagBvh = new();
 
-    [SerializeField] private GameplayTagSet testTagSet;
-
     public static GameplayTag RootTag => GameplayTagConfig.instance.rootTag;
     
     public static TagManager I { get; private set; }
@@ -60,7 +58,18 @@ public class TagManager : SimBehaviour
             tagBvh[gameplayTag].InsertEntity(simObject);
         }
     }
+    
+    public IEnumerable<SimObject> GetObjectsInRangeWithTag(Vector3d position, double radius, GameplayTag gameplayTag)
+    {
+        var circle = new CircleD2d(position.XZ(), radius);
+        var results = new List<SimObject>();
 
+        foreach (var simObject in tagBvh[gameplayTag].TopDownQuery(circle))
+        {
+            if (simObject.SimCollider.GetCurrentGlobalShape().Intersects(circle))
+                yield return simObject;
+        }
+    }
     public void UnregisterTagComponent(TagComponent component)
     {
         Assert.IsNotNull(component, "TagComponent cannot be null");

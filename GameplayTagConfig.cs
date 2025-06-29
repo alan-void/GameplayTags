@@ -6,7 +6,6 @@ using UnityEngine.Serialization;
 
 namespace GameplayTags
 {
-[FilePath("Settings/tags/TagConfig.json", FilePathAttribute.Location.ProjectFolder)]
 public class GameplayTagConfig : ScriptableSingleton<GameplayTagConfig>
 {
     // [SerializeField] private List<GameplayTag> rootTags;
