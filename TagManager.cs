@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using GameplayTags;
+using H2V.GameplayAbilitySystem.TagSystem;
 using spatial;
 using UnityEditor;
 using UnityEngine;
@@ -9,10 +9,8 @@ using UnityEngine.Assertions;
 
 public class TagManager : SimBehaviour
 {
-    private Dictionary<GameplayTag, Bvh2d<SimObject>> tagBvh = new();
+    private Dictionary<GameplayTagSO, Bvh2d<SimObject>> tagBvh = new();
 
-    public static GameplayTag RootTag => GameplayTagConfig.instance.rootTag;
-    
     public static TagManager I { get; private set; }
 
     public bool debugDrawBvh = false;
@@ -30,7 +28,7 @@ public class TagManager : SimBehaviour
         }
     }
     
-    public void RegisterTagComponent(TagComponent component)
+    public void RegisterTagComponent(SimTagComponent component)
     {
         Assert.IsNotNull(component, "TagComponent cannot be null");
         
@@ -59,7 +57,8 @@ public class TagManager : SimBehaviour
         }
     }
     
-    public IEnumerable<SimObject> GetObjectsInRangeWithTag(Vector3d position, double radius, GameplayTag gameplayTag)
+    public IEnumerable<SimObject> GetObjectsInRangeWithTag(Vector3d position, 
+        double radius, GameplayTagSO gameplayTag)
     {
         var circle = new CircleD2d(position.XZ(), radius);
         var results = new List<SimObject>();
@@ -70,7 +69,7 @@ public class TagManager : SimBehaviour
                 yield return simObject;
         }
     }
-    public void UnregisterTagComponent(TagComponent component)
+    public void UnregisterTagComponent(SimTagComponent component)
     {
         Assert.IsNotNull(component, "TagComponent cannot be null");
         
@@ -86,7 +85,7 @@ public class TagManager : SimBehaviour
         component.SimObject.OnVelocityChanged -= UpdateBvh;
     }
     
-    void OnTagSetAltered(TagComponent component, GameplayTag gameplayTag, bool added)
+    void OnTagSetAltered(SimTagComponent component, GameplayTagSO gameplayTag, bool added)
     {
         if (added)
         {
