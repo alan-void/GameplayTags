@@ -100,10 +100,10 @@ public class GameplayTagSet : IEnumerable<GameplayTagSO>
         return other.tags.All(HasChildOf);
     }
 
-    public IEnumerable<GameplayTagSO> GetAllTags()
-    {
-        return tags;
-    }
+    // public IEnumerable<GameplayTagSO> GetAllTags()
+    // {
+    //     return tags;
+    // }
 
     public override string ToString()
     {
@@ -113,6 +113,7 @@ public class GameplayTagSet : IEnumerable<GameplayTagSO>
     {
         foreach (var tag in tags)
         {
+            if(!tag) continue;
             yield return tag;
         }
     }

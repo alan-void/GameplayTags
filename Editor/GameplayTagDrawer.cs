@@ -49,7 +49,6 @@ namespace GameplayTags.Editor
         private SerializedProperty _currentProperty;
         private const float BUTTON_WIDTH = 20f;
         private const string OBJECT_FIELD_BUTTON_STYLE = "ObjectFieldButton";
-        private static GameplayTagDropdown _activeDropdown;
         private static PopupWindowContent _activePopup;
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
@@ -86,8 +85,7 @@ namespace GameplayTags.Editor
         private void ShowDropdown(Rect fieldRect)
         {
             var dropdownRect = new Rect(fieldRect.x, fieldRect.yMax, fieldRect.width, 0);
-            _activeDropdown = new GameplayTagDropdown(this);
-            _activeDropdown.Show(dropdownRect);
+            (new GameplayTagDropdown(this)).Show(dropdownRect);
         }
 
         /// <summary>
