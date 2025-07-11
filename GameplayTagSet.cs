@@ -19,6 +19,11 @@ public class GameplayTagSet : IEnumerable<GameplayTagSO>
     {
         tags = new SerializableHashSet<GameplayTagSO>(initialTags);
     }
+
+    public GameplayTagSet Clone()
+    {
+        return new GameplayTagSet(this);
+    }
     
     public void Clear() => tags.Clear();
     public bool AddTag(GameplayTagSO tag)
