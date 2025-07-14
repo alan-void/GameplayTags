@@ -33,12 +33,24 @@ public class GameplayTagSet : IEnumerable<GameplayTagSO>
 
     public void AddTagSet(GameplayTagSet otherSet)
     {
-        tags.Value.UnionWith(otherSet.tags);
+        tags.UnionWith(otherSet.tags);
     }
 
     public bool RemoveTag(GameplayTagSO tag)
     {
         return tags.Remove(tag);
+    }
+
+    public GameplayTagSet Intersection(GameplayTagSet otherSet)
+    {
+        var newSet = new GameplayTagSet();
+        foreach (var tag in otherSet)
+        {
+            if(tags.Contains(tag))
+                newSet.AddTag(tag);
+        }
+
+        return newSet;
     }
     
     public GameplayTagSet Difference(GameplayTagSet other)
