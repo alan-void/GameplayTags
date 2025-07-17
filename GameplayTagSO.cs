@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace GameplayTags
 {   
-    [CreateAssetMenu(fileName = "TagSO", menuName = "Gameplay Ability System/Tag")]
+    [CreateAssetMenu(fileName = "TagSO", menuName = "GameplayAbilitySystem/Tag")]
     public class GameplayTagSO : ScriptableObject
     {
         [SerializeField] internal string tagName;
