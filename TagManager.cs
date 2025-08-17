@@ -60,6 +60,11 @@ public class TagManager : SimBehaviour
         var circle = new CircleD2d(position.XZ(), radius);
         var results = new List<SimObject>();
 
+        if (!tagBvh.ContainsKey(gameplayTag))
+        {
+            yield break;
+        }
+        
         foreach (var simObject in tagBvh[gameplayTag].TopDownQuery(circle))
         {
             if (simObject.SimCollider.GetCurrentGlobalShape().Intersects(circle))

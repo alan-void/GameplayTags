@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 namespace GameplayTags
@@ -15,6 +16,8 @@ namespace GameplayTags
 
         string _tagFullName;
         public string TagFullName => _tagFullName;
+        
+        public static GameplayTagSO Default { get; private set; }
         
         private void Awake()
         {

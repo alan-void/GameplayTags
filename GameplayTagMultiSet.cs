@@ -5,20 +5,21 @@ using UnityEngine;
 namespace GameplayTags
 {
 [Serializable]
-public class GameplayTagMultiSet
+public class GameplayTagMultiSet: ISerializationCallbackReceiver
 {
     [SerializeField] private SerializableDictionary<GameplayTagSO, int> tagToCountMap = new();
 
+    //TODO: this should be readonly, expose the multiset in inspector
     /// <summary>
     /// A set containing tags with positive count
     /// </summary>
-    [SerializeField] private GameplayTagSet positiveCountTags;
+    private GameplayTagSet _positiveCountTags;
     
     /// <summary>
     /// Returns set containing tags with positive count. Do not modify
     /// </summary>
     /// <returns></returns>
-    public GameplayTagSet GetNormalTagSet() =>  positiveCountTags;
+    public GameplayTagSet GetNormalTagSet() =>  _positiveCountTags;
 
     public void UpdateTagCount(GameplayTagSet tagSet, int countDelta)
     {
@@ -45,12 +46,12 @@ public class GameplayTagMultiSet
         if(newCount<=0 && count <= 0) return false;
         if (newCount > 0 && count <= 0)
         {
-            positiveCountTags.AddTag(tag);
+            _positiveCountTags.AddTag(tag);
             return true;
         }
         if (newCount <= 0 && count > 0)
         {
-            positiveCountTags.RemoveTag(tag);
+            _positiveCountTags.RemoveTag(tag);
             return true;
         }
         Assert.IsTrue(false);
@@ -74,6 +75,21 @@ public class GameplayTagMultiSet
     {
         tagToCountMap.TryGetValue(tag, out var count);
         return count;
+    }
+
+    public void OnBeforeSerialize()
+    {
+    }
+    public void OnAfterDeserialize()
+    {
+        _positiveCountTags = new GameplayTagSet();
+        foreach (var pair in tagToCountMap)
+        {
+            if (pair.Value > 0)
+            {
+                _positiveCountTags.AddTag(pair.Key);
+            }
+        }
     }
 }
 }
