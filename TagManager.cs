@@ -35,7 +35,7 @@ public class TagManager : SimBehaviour
             {
                 tagBvh[gameplayTag] = new();
             }
-            tagBvh[gameplayTag].InsertEntity(component.SimObject);
+            tagBvh[gameplayTag].InsertEntity(component.SimObject, 1);
         }
 
         component.SimObject.OnPeriodicUpdate += UpdateBvh;
@@ -50,7 +50,7 @@ public class TagManager : SimBehaviour
             //the remove works because the new bounds will still intersect the old bounds
             //TODO: Add fail warning here
             tagBvh[gameplayTag].RemoveEntity(simObject);
-            tagBvh[gameplayTag].InsertEntity(simObject);
+            tagBvh[gameplayTag].InsertEntity(simObject, 1);
         }
     }
     
@@ -95,7 +95,7 @@ public class TagManager : SimBehaviour
             {
                 tagBvh[gameplayTag] = new();
             }
-            tagBvh[gameplayTag].InsertEntity(component.SimObject);
+            tagBvh[gameplayTag].InsertEntity(component.SimObject, 1);
         }
         else
         {
