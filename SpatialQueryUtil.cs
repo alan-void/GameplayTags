@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace GameplayTags
@@ -99,6 +100,11 @@ public static class SpatialQueryUtil
 
         result = null;
         return false;
+    }
+
+    public static IEnumerable<SimObject> GeAllObjectsInRange(Vector3d position, double radius)
+    {
+        return TagManager.I.GetAllObjectsInRange(position, radius);
     }
 }
 }

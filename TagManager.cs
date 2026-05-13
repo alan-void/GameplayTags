@@ -71,6 +71,19 @@ public class TagManager : SimBehaviour
                 yield return simObject;
         }
     }
+
+    public IEnumerable<SimObject> GetAllObjectsInRange(Vector3d position, double radius)
+    {
+        var circle = new CircleD2d(position.XZ(), radius);
+        foreach (var bvhTree in tagBvh.Values)
+        {
+            foreach (var simObject in bvhTree.TopDownQuery(circle))
+            {
+                if (simObject.SimCollider.GetCurrentGlobalShape().Intersects(circle))
+                    yield return simObject;
+            }
+        }       
+    }
     public void UnregisterTagComponent(SimTagComponent component)
     {
         Assert.IsNotNull(component, "TagComponent cannot be null");
