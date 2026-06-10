@@ -178,7 +178,7 @@ namespace GameplayTags.Editor
         {
             var item = new TagTreeViewItem
             {
-                id = gameplayTag.GetInstanceID(),
+                id = gameplayTag.GetEntityId().GetHashCode(),
                 displayName = gameplayTag.TagName,
                 GameplayTag = gameplayTag
             };
