@@ -19,7 +19,7 @@ public static class SpatialQueryUtil
     /// <returns><c>true</c> if a matching object was found inside <paramref name="radius"/>; otherwise <c>false</c>.</returns>
     /// <remarks>
     /// This method queries <see cref="TagManager.GetObjectsInRangeWithTag"/> using the source's predicted position
-    /// and then selects the nearest object by comparing predicted positions using <see cref="Vector3d.Distance"/>.
+    /// and then selects the nearest object by comparing predicted positions using <see cref="VectorD3D.Distance"/>.
     /// </remarks>
     public static bool TryFindNearestWithTag(SimObject source, double radius, GameplayTagSO tag, out SimObject result)
     {
@@ -29,7 +29,7 @@ public static class SpatialQueryUtil
                      source.GE_GetPredictedPosition(),
                      radius, tag))
         {
-            var distance = Vector3d.Distance(
+            var distance = VectorD3D.Distance(
                 source.GE_GetPredictedPosition(), simObject.GE_GetPredictedPosition());
             if (distance < nearestDistance)
             {
@@ -59,7 +59,7 @@ public static class SpatialQueryUtil
     /// <remarks>
     /// This method iterates over each tag in the <paramref name="tags"/> set and queries
     /// <see cref="TagManager.GetObjectsInRangeWithTag"/> using the source's predicted position for each tag.
-    /// It then selects the nearest object by comparing predicted positions using <see cref="Vector3d.Distance"/>.
+    /// It then selects the nearest object by comparing predicted positions using <see cref="VectorD3D.Distance"/>.
     /// </remarks>
     public static bool TryFindNearestWithTagAny(SimObject source, double radius, GameplayTagSet tags, out SimObject result)
     {
@@ -82,7 +82,7 @@ public static class SpatialQueryUtil
                          source.GE_GetPredictedPosition(),
                          radius, tag))
             {
-                var distance = Vector3d.Distance(
+                var distance = VectorD3D.Distance(
                     source.GE_GetPredictedPosition(), simObject.GE_GetPredictedPosition());
                 if (distance < nearestDistance)
                 {
@@ -102,7 +102,7 @@ public static class SpatialQueryUtil
         return false;
     }
 
-    public static IEnumerable<SimObject> GeAllObjectsInRange(Vector3d position, double radius)
+    public static IEnumerable<SimObject> GeAllObjectsInRange(VectorD3D position, double radius)
     {
         return TagManager.I.GetAllObjectsInRange(position, radius);
     }
