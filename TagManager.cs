@@ -6,7 +6,7 @@ using UnityEngine.Assertions;
 
 public class TagManager : SimBehaviour
 {
-    private Dictionary<GameplayTagSO, Bvh2d<SimObject>> tagBvh = new();
+    private Dictionary<GameplayTagSO, Bvh2D<SimObject>> tagBvh = new();
 
     public static TagManager I { get; private set; }
 
@@ -57,7 +57,7 @@ public class TagManager : SimBehaviour
     public IEnumerable<SimObject> GetObjectsInRangeWithTag(VectorD3D position, 
         double radius, GameplayTagSO gameplayTag)
     {
-        var circle = new CircleD2D(position.XZ(), radius);
+        var circle = new CircleD(position.XZ(), radius);
         var results = new List<SimObject>();
 
         if (!tagBvh.ContainsKey(gameplayTag))
@@ -74,7 +74,7 @@ public class TagManager : SimBehaviour
 
     public IEnumerable<SimObject> GetAllObjectsInRange(VectorD3D position, double radius)
     {
-        var circle = new CircleD2D(position.XZ(), radius);
+        var circle = new CircleD(position.XZ(), radius);
         foreach (var bvhTree in tagBvh.Values)
         {
             foreach (var simObject in bvhTree.TopDownQuery(circle))
