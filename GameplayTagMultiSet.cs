@@ -1,11 +1,11 @@
 using System;
-using NUnit.Framework;
+using UnityEngine.Assertions;
 using UnityEngine;
 
 namespace GameplayTags
 {
 [Serializable]
-public class GameplayTagMultiSet: ISerializationCallbackReceiver
+public class GameplayTagMultiSet : ISerializationCallbackReceiver
 {
     [SerializeField] private SerializableDictionary<GameplayTagSO, int> tagToCountMap = new();
 
@@ -14,12 +14,12 @@ public class GameplayTagMultiSet: ISerializationCallbackReceiver
     /// A set containing tags with positive count
     /// </summary>
     private GameplayTagSet _positiveCountTags;
-    
+
     /// <summary>
     /// Returns set containing tags with positive count. Do not modify
     /// </summary>
     /// <returns></returns>
-    public GameplayTagSet GetNormalTagSet() =>  _positiveCountTags;
+    public GameplayTagSet GetNormalTagSet() => _positiveCountTags;
 
     public void UpdateTagCount(GameplayTagSet tagSet, int countDelta)
     {
@@ -29,7 +29,7 @@ public class GameplayTagMultiSet: ISerializationCallbackReceiver
             UpdateTagCount(tag, countDelta);
         }
     }
-    
+
     /// <summary>
     /// 
     /// </summary>
@@ -40,24 +40,26 @@ public class GameplayTagMultiSet: ISerializationCallbackReceiver
     {
         if (countDelta == 0) return false;
         tagToCountMap.TryGetValue(tag, out var count);
-        var newCount =  count + countDelta;
+        var newCount = count + countDelta;
         tagToCountMap[tag] = newCount;
-        if(newCount>0 && count > 0) return false;
-        if(newCount<=0 && count <= 0) return false;
+        if (newCount > 0 && count > 0) return false;
+        if (newCount <= 0 && count <= 0) return false;
         if (newCount > 0 && count <= 0)
         {
             _positiveCountTags.AddTag(tag);
             return true;
         }
+
         if (newCount <= 0 && count > 0)
         {
             _positiveCountTags.RemoveTag(tag);
             return true;
         }
+
         Assert.IsTrue(false);
         return true;
     }
-    
+
     /// <summary>
     /// 
     /// </summary>
@@ -80,6 +82,7 @@ public class GameplayTagMultiSet: ISerializationCallbackReceiver
     public void OnBeforeSerialize()
     {
     }
+
     public void OnAfterDeserialize()
     {
         _positiveCountTags = new GameplayTagSet();

@@ -8,12 +8,15 @@ namespace GameplayTags
 {
 [Serializable]
 public class GameplayTagSet : IEnumerable<GameplayTagSO>
-{ 
+{
     [SerializeField] private SerializableHashSet<GameplayTagSO> tags = new();
 
     public int Count => tags.Count;
     public static GameplayTagSet Empty { get; } = new();
-    public GameplayTagSet() { }
+
+    public GameplayTagSet()
+    {
+    }
 
     public GameplayTagSet(IEnumerable<GameplayTagSO> initialTags)
     {
@@ -24,8 +27,9 @@ public class GameplayTagSet : IEnumerable<GameplayTagSO>
     {
         return new GameplayTagSet(this);
     }
-    
+
     public void Clear() => tags.Clear();
+
     public bool AddTag(GameplayTagSO tag)
     {
         return tags.Add(tag);
@@ -46,13 +50,13 @@ public class GameplayTagSet : IEnumerable<GameplayTagSO>
         var newSet = new GameplayTagSet();
         foreach (var tag in otherSet)
         {
-            if(tags.Contains(tag))
+            if (tags.Contains(tag))
                 newSet.AddTag(tag);
         }
 
         return newSet;
     }
-    
+
     public GameplayTagSet Difference(GameplayTagSet other)
     {
         return new GameplayTagSet(tags.Except(other.tags));
@@ -62,16 +66,17 @@ public class GameplayTagSet : IEnumerable<GameplayTagSO>
     {
         return tags.Contains(tag);
     }
-    
+
     public bool HasTagAny(GameplayTagSet other)
     {
         return other.tags.Any(HasTag);
     }
-    
+
     public bool HasTagAll(GameplayTagSet other)
     {
         return other.tags.All(HasTag);
     }
+
     /// <summary>
     /// a tag is considered a parent of itself.
     /// </summary>
@@ -91,22 +96,22 @@ public class GameplayTagSet : IEnumerable<GameplayTagSO>
     {
         return other.tags.Any(HasParentOf);
     }
-    
+
     public bool HasParentOfAll(GameplayTagSet other)
     {
         return other.tags.All(HasParentOf);
     }
-    
+
     public bool HasChildOf(GameplayTagSO tag)
     {
         return tags.Any(t => t.IsChildOf(tag));
     }
-    
+
     public bool AreAllChildOf(GameplayTagSO tag)
     {
         return tags.All(t => t.IsChildOf(tag));
     }
-    
+
     public bool HasChildOfAny(GameplayTagSet other)
     {
         return other.tags.Any(HasChildOf);
@@ -126,11 +131,12 @@ public class GameplayTagSet : IEnumerable<GameplayTagSO>
     {
         return $"[{string.Join(", ", tags.Select(t => t.TagName))}]";
     }
+
     public IEnumerator<GameplayTagSO> GetEnumerator()
     {
         foreach (var tag in tags)
         {
-            if(!tag) continue;
+            if (!tag) continue;
             yield return tag;
         }
     }
@@ -139,7 +145,5 @@ public class GameplayTagSet : IEnumerable<GameplayTagSO>
     {
         return GetEnumerator();
     }
-
-
 }
 }

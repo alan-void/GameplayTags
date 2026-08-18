@@ -3,7 +3,6 @@ using UnityEngine;
 
 namespace GameplayTags.Editor
 {
-#if UNITY_EDITOR
 [CustomPropertyDrawer(typeof(GameplayTagSet))]
 public class GameplayTagSetDrawer : PropertyDrawer
 {
@@ -21,5 +20,4 @@ public class GameplayTagSetDrawer : PropertyDrawer
         return EditorGUI.GetPropertyHeight(valuesProp, label, true);
     }
 }
-#endif
 }
