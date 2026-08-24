@@ -69,6 +69,16 @@ public class GameplayTagSO : ScriptableObject
         }
     }
 
+    public void UpdateFullname()
+    {
+        if (parentTag)
+            _tagFullName = parentTag.TagFullName + "." + tagName;
+        else
+            _tagFullName = tagName;
+        foreach (var child in childTags)
+            child.UpdateFullname();
+    }
+
 #if UNITY_EDITOR
     public static System.Action OnTagsChangedEditorCallback;
 
@@ -81,16 +91,6 @@ public class GameplayTagSO : ScriptableObject
     {
         tagName = newName;
         UpdateFullname();
-    }
-
-    public void UpdateFullname()
-    {
-        if (parentTag)
-            _tagFullName = parentTag.TagFullName + "." + tagName;
-        else
-            _tagFullName = tagName;
-        foreach (var child in childTags)
-            child.UpdateFullname();
     }
 
     public void SetParent(GameplayTagSO newParent)
