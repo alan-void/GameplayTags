@@ -11,9 +11,14 @@ public class GameplayTagMultiSet : ISerializationCallbackReceiver
 
     //TODO: this should be readonly, expose the multiset in inspector
     /// <summary>
-    /// A set containing tags with positive count
+    /// A set containing tags with positive count.
     /// </summary>
-    private GameplayTagSet _positiveCountTags;
+    /// <remarks>
+    /// Built here rather than only in <see cref="OnAfterDeserialize"/>, which does not run for
+    /// a multiset that was constructed rather than loaded - a component added at runtime has
+    /// no serialized data to apply - and left the first tag update to throw.
+    /// </remarks>
+    private GameplayTagSet _positiveCountTags = new();
 
     /// <summary>
     /// Returns set containing tags with positive count. Do not modify
@@ -85,7 +90,7 @@ public class GameplayTagMultiSet : ISerializationCallbackReceiver
 
     public void OnAfterDeserialize()
     {
-        _positiveCountTags = new GameplayTagSet();
+        _positiveCountTags.Clear();
         foreach (var pair in tagToCountMap)
         {
             if (pair.Value > 0)
