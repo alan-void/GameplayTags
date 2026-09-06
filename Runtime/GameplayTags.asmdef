@@ -1,9 +1,7 @@
 {
     "name": "GameplayTags",
     "rootNamespace": "GameplayTags",
-    "references": [
-        "SimLib"
-    ],
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

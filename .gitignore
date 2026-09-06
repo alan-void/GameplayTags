@@ -1,0 +1,14 @@
+# Unity project folders that appear if the package is opened inside a project
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+
+# IDE
+.idea/
+.vs/
+*.csproj
+*.sln
+*.DotSettings
+*.user

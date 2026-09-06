@@ -1,7 +1,9 @@
 using UnityEditor;
 using UnityEngine;
 
-public class AssetEditorUtils
+namespace GameplayTags.Editor
+{
+public static class AssetEditorUtils
 {
     public static void RenameAsset(ScriptableObject so, string newName)
     {
@@ -22,4 +24,5 @@ public class AssetEditorUtils
             Debug.Log($"Renamed asset to '{newName}'");
         }
     }
+}
 }

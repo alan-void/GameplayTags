@@ -13,7 +13,7 @@ public class TagsBrowser : EditorWindow
     private ToolbarSearchField _searchField;
     private TextField _newTagField;
 
-    [MenuItem("Window/Gameplay Ability System/Tags Browser %#T")]
+    [MenuItem("Window/GameplayTags/Tags Browser %#T")]
     public static void ShowWindow()
     {
         var window = GetWindow<TagsBrowser>("Tags Browser");

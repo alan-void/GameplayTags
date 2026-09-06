@@ -1,0 +1,22 @@
+{
+  "name": "com.alanvoid.gameplaytags",
+  "version": "1.0.0",
+  "displayName": "Gameplay Tags",
+  "description": "Hierarchical gameplay tags for Unity: ScriptableObject tag assets, exact and hierarchical tag sets, a ref-counted multiset, and an editor Tags Browser.",
+  "unity": "6000.0",
+  "keywords": [
+    "gameplay",
+    "tags",
+    "gameplay-tags",
+    "ability-system"
+  ],
+  "author": {
+    "name": "alan_void",
+    "url": "https://github.com/alanaman"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alanaman/GameplayTags.git"
+  }
+}
