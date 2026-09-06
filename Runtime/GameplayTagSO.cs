@@ -17,15 +17,51 @@ public class GameplayTagSO : ScriptableObject
     public string TagName => tagName;
 
     string _tagFullName;
-    public string TagFullName => _tagFullName;
+
+    /// <summary>The dotted path from the root, e.g. <c>Damage.Fire</c>.</summary>
+    /// <remarks>
+    /// Built by walking <em>up</em> the parent chain on first use, not pushed down from the root by
+    /// <see cref="Awake"/>. Awake fires per object as each asset loads, before its siblings are
+    /// necessarily resolved, so pushing down gave a name to whichever tags happened to be wired at
+    /// that instant and left the rest empty - load-order roulette that showed up as most of a
+    /// vocabulary rendering under its asset filename instead of its tag path.
+    /// <para>
+    /// Cached after the first walk, and cleared down the tree by <see cref="UpdateFullname"/> when a
+    /// rename or reparent makes it stale.
+    /// </para>
+    /// </remarks>
+    public string TagFullName
+    {
+        get
+        {
+            if (!string.IsNullOrEmpty(_tagFullName)) return _tagFullName;
+
+            _tagFullName = BuildFullName();
+            return _tagFullName;
+        }
+    }
+
+    /// <summary>
+    /// Walks to the root, with a depth cap so a tag that is somehow its own ancestor cannot hang the
+    /// editor. <see cref="ValidateSelfParent"/> only catches the one-step case.
+    /// </summary>
+    string BuildFullName()
+    {
+        const int maxDepth = 64;
+
+        var name = tagName;
+        var ancestor = parentTag;
+
+        for (var depth = 0; ancestor && depth < maxDepth; depth++)
+        {
+            name = ancestor.tagName + "." + name;
+            ancestor = ancestor.parentTag;
+        }
+
+        return name;
+    }
 
     public static GameplayTagSO Default { get; private set; }
-
-    private void Awake()
-    {
-        if (!parentTag)
-            UpdateFullname();
-    }
 
     /// <summary>
     /// returns true if this tag is a child of the other tag.
@@ -57,11 +93,19 @@ public class GameplayTagSO : ScriptableObject
         return other.IsChildOf(this);
     }
 
+    /// <summary>This tag and every tag below it, skipping children whose asset is gone.</summary>
+    /// <remarks>
+    /// A deleted tag leaves a missing reference behind in its parent's list. Yielding one hands the
+    /// caller an object whose every native member - <c>name</c> included - throws
+    /// <c>MissingReferenceException</c>, so the check belongs here rather than at each call site.
+    /// </remarks>
     public IEnumerator<GameplayTagSO> GetEnumerator()
     {
         yield return this;
         foreach (var child in childTags)
         {
+            if (!child) continue;
+
             foreach (var descendant in child)
             {
                 yield return descendant;
@@ -69,18 +113,37 @@ public class GameplayTagSO : ScriptableObject
         }
     }
 
+    /// <summary>
+    /// Invalidates this tag's cached full name and every name below it, after a rename or reparent.
+    /// </summary>
+    /// <remarks>
+    /// Clears rather than recomputes: <see cref="TagFullName"/> rebuilds on demand, so a subtree
+    /// nobody asks about costs nothing, and a child that is not loaded yet cannot be skipped.
+    /// </remarks>
     public void UpdateFullname()
     {
-        if (parentTag)
-            _tagFullName = parentTag.TagFullName + "." + tagName;
-        else
-            _tagFullName = tagName;
+        _tagFullName = null;
+
         foreach (var child in childTags)
-            child.UpdateFullname();
+        {
+            if (child)
+                child.UpdateFullname();
+        }
     }
 
 #if UNITY_EDITOR
     public static System.Action OnTagsChangedEditorCallback;
+
+    /// <summary>
+    /// Drops references to child assets that no longer exist, in memory.
+    /// </summary>
+    /// <remarks>
+    /// Needed because <see cref="ChildTags"/> hands out a copy, so the obvious
+    /// <c>tag.ChildTags.RemoveAll(...)</c> mutates nothing and every reload rediscovers the same
+    /// dead entries. Not marked dirty: this repairs what is loaded, and the asset is rewritten
+    /// whenever the tag is actually edited.
+    /// </remarks>
+    public void RemoveMissingChildren() => childTags.RemoveAll(child => !child);
 
     private void OnValidate()
     {

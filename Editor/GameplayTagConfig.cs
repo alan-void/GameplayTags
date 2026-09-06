@@ -50,7 +50,9 @@ public class GameplayTagConfig : ScriptableSingleton<GameplayTagConfig>
         rootTags = new List<GameplayTagSO>();
         foreach (var tag in allTags)
         {
-            tag.ChildTags.RemoveAll(t => !t);
+            // Not tag.ChildTags.RemoveAll: that property returns a copy, so the call cleaned up
+            // nothing and deleted tags stayed in their parent's list to be handed out by GetAllTags.
+            tag.RemoveMissingChildren();
             if (!tag.ParentTag)
                 rootTags.Add(tag);
         }

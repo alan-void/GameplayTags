@@ -32,6 +32,8 @@ public static class GameplayTagPicker
         var menu = new GenericMenu();
         foreach (var tag in GameplayTagConfig.instance.GetAllTags())
         {
+            if (!tag) continue;
+
             var captured = tag;
             menu.AddItem(new GUIContent(NameOf(tag)), false, () => onPicked(captured));
         }
@@ -52,8 +54,12 @@ public static class GameplayTagPicker
     /// Falls back to the asset name: <see cref="GameplayTagSO.TagFullName"/> is rebuilt at load time
     /// from the root down and is empty for a tag whose root has not been loaded.
     /// </summary>
-    static string NameOf(GameplayTagSO tag) =>
-        string.IsNullOrEmpty(tag.TagFullName) ? tag.name : tag.TagFullName;
+    static string NameOf(GameplayTagSO tag)
+    {
+        if (!tag) return "(missing)";
+
+        return string.IsNullOrEmpty(tag.TagFullName) ? tag.name : tag.TagFullName;
+    }
 }
 
 /// <summary>Asks for a dotted tag name. Validation lives in <see cref="GameplayTagConfig.AddTag"/>.</summary>
