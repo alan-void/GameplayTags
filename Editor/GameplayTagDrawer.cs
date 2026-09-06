@@ -12,16 +12,20 @@ namespace GameplayTags.Editor
 /// <summary>
 /// Popup window that shows filtered gameplay tag suggestions as the user types.
 /// </summary>
+/// <remarks>
+/// Takes a callback rather than the drawer it was written for, so anything that needs to pick a tag
+/// can open it - see <see cref="GameplayTagPicker"/>.
+/// </remarks>
 public class GameplayTagDropdown : AdvancedDropdown
 {
-    private readonly GameplayTagDrawer _ownerDrawer;
+    private readonly Action<GameplayTagSO> _onPicked;
 
     private Dictionary<AdvancedDropdownItem, GameplayTagSO> _dropdownTags = new();
 
-    public GameplayTagDropdown(GameplayTagDrawer ownerDrawer) :
+    public GameplayTagDropdown(Action<GameplayTagSO> onPicked) :
         base(new AdvancedDropdownState())
     {
-        _ownerDrawer = ownerDrawer;
+        _onPicked = onPicked;
     }
 
     protected override AdvancedDropdownItem BuildRoot()
@@ -39,7 +43,7 @@ public class GameplayTagDropdown : AdvancedDropdown
 
     protected override void ItemSelected(AdvancedDropdownItem item)
     {
-        _ownerDrawer.HandleTagSelection(_dropdownTags[item]);
+        _onPicked?.Invoke(_dropdownTags[item]);
     }
 }
 
@@ -88,7 +92,7 @@ public class GameplayTagDrawer : PropertyDrawer
     private void ShowDropdown(Rect fieldRect)
     {
         var dropdownRect = new Rect(fieldRect.x, fieldRect.yMax, fieldRect.width, 0);
-        (new GameplayTagDropdown(this)).Show(dropdownRect);
+        (new GameplayTagDropdown(HandleTagSelection)).Show(dropdownRect);
     }
 
     /// <summary>
