@@ -151,6 +151,7 @@ public class TagsBrowser : EditorWindow
         if (tag == null) return;
 
         element.userData = tag;
+        element.tooltip = tag.Description ?? string.Empty;
 
         var label = element.Q<Label>();
         label.text = tag.TagName;

@@ -12,9 +12,14 @@ public class GameplayTagSO : ScriptableObject
     [SerializeField] internal string tagName;
     [SerializeField] internal GameplayTagSO parentTag;
     [SerializeField] internal List<GameplayTagSO> childTags = new();
+
+    /// <summary>What the tag means, in plain words, for people and for tools that apply it.</summary>
+    [SerializeField, TextArea(2, 8)] internal string description;
+
     public GameplayTagSO ParentTag => parentTag;
     public List<GameplayTagSO> ChildTags => new(childTags);
     public string TagName => tagName;
+    public string Description => description;
 
     string _tagFullName;
 
