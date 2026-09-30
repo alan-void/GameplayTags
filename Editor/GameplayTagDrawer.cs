@@ -148,7 +148,7 @@ public class GameplayTagDrawer : PropertyDrawer
             title = "Select Gameplay Tag",
             selectHandler = OnTagSelected,
             position = position,
-            itemSize = 0
+            itemIconSize = 0
         };
 
         SearchService.ShowPicker(viewState);

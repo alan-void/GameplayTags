@@ -64,7 +64,7 @@ public class TagsBrowser : EditorWindow
             bindItem = BindTreeItem
         };
 
-        _treeView.onItemsChosen += OnItemsChosen;
+        _treeView.itemsChosen += OnItemsChosen;
 
         rootVisualElement.Add(_treeView);
 
